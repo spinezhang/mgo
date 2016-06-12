@@ -420,9 +420,17 @@ func (socket *mongoSocket) Query(ops ...interface{}) (err error) {
 			buf = addCString(buf, op.collection)
 			for _, doc := range op.documents {
 				debugf("Socket %p to %s: serializing document for insertion: %#v", socket, socket.addr, doc)
-				buf, err = addBSON(buf, doc)
-				if err != nil {
-					return err
+				switch doc.(type) {
+				case []byte:
+					docBuf := doc.([]byte)
+					buf = append(buf, docBuf...)
+					fmt.Println(docBuf)
+
+				default:
+					buf, err = addBSON(buf, doc)
+					if err != nil {
+						return err
+					}
 				}
 			}
 

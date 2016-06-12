@@ -4505,7 +4505,7 @@ func (c *Collection) writeOp(op interface{}, ordered bool) (lerr *LastError, err
 
 	s.m.RLock()
 	safeOp := s.safeOp
-	bypassValidation := s.bypassValidation
+	//bypassValidation := s.bypassValidation
 	s.m.RUnlock()
 
 	if socket.ServerInfo().MaxWireVersion >= 2 {
@@ -4521,7 +4521,8 @@ func (c *Collection) writeOp(op interface{}, ordered bool) (lerr *LastError, err
 					l = len(all)
 				}
 				op.documents = all[i:l]
-				oplerr, err := c.writeOpCommand(socket, safeOp, op, ordered, bypassValidation)
+				oplerr, err := c.writeOpQuery(socket, safeOp, op, ordered)
+				//oplerr, err := c.writeOpCommand(socket, safeOp, op, ordered, bypassValidation)
 				lerr.N += oplerr.N
 				lerr.modified += oplerr.modified
 				if err != nil {
@@ -4539,7 +4540,8 @@ func (c *Collection) writeOp(op interface{}, ordered bool) (lerr *LastError, err
 			}
 			return &lerr, nil
 		}
-		return c.writeOpCommand(socket, safeOp, op, ordered, bypassValidation)
+		return c.writeOpQuery(socket, safeOp, op, ordered)
+		//return c.writeOpCommand(socket, safeOp, op, ordered, bypassValidation)
 	} else if updateOps, ok := op.(bulkUpdateOp); ok {
 		var lerr LastError
 		for i, updateOp := range updateOps {
