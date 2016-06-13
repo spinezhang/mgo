@@ -424,7 +424,6 @@ func (socket *mongoSocket) Query(ops ...interface{}) (err error) {
 				case []byte:
 					docBuf := doc.([]byte)
 					buf = append(buf, docBuf...)
-					fmt.Println(docBuf)
 
 				default:
 					buf, err = addBSON(buf, doc)

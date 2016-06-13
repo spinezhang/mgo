@@ -220,11 +220,16 @@ func (d *decoder) readDocTo(out reflect.Value) {
 			origout.Set(d.readRawDocElems(outt))
 			return
 		}
-		fallthrough
+		//fallthrough
+		// use readSlice to decode the slice
+		d.readElemTo(out,'\x04')
 	default:
 		panic("Unsupported document type for unmarshalling: " + out.Type().String())
 	}
 
+	if d.i >= len(d.in) {
+		return
+	}
 	end := int(d.readInt32())
 	end += d.i - 4
 	if end <= d.i || end > len(d.in) || d.in[end-1] != '\x00' {

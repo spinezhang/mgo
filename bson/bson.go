@@ -434,7 +434,7 @@ type DBPointer struct {
 	Id        ObjectId
 }
 
-const initialBufferSize = 64
+const initialBufferSize = 128
 
 func handleErr(err *error) {
 	if r := recover(); r != nil {
