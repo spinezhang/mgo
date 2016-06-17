@@ -196,7 +196,7 @@ func (gfs *GridFS) Create(name string) (file *GridFile, err error) {
 //
 func (gfs *GridFS) OpenId(id interface{}) (file *GridFile, err error) {
 	var doc gfsFile
-	err = gfs.Files.Find(bson.M{"_id": id}).One(&doc)
+	err = gfs.Files.Find(bson.M{"_id": id}).One(&doc, nil)
 	if err != nil {
 		return
 	}
@@ -240,7 +240,7 @@ func (gfs *GridFS) OpenId(id interface{}) (file *GridFile, err error) {
 //
 func (gfs *GridFS) Open(name string) (file *GridFile, err error) {
 	var doc gfsFile
-	err = gfs.Files.Find(bson.M{"filename": name}).Sort("-uploadDate").One(&doc)
+	err = gfs.Files.Find(bson.M{"filename": name}).Sort("-uploadDate").One(&doc, nil)
 	if err != nil {
 		return
 	}
@@ -285,7 +285,7 @@ func (gfs *GridFS) OpenNext(iter *Iter, file **GridFile) bool {
 		_ = (*file).Close()
 	}
 	var doc gfsFile
-	if !iter.Next(&doc) {
+	if !iter.Next(&doc, nil) {
 		*file = nil
 		return false
 	}
@@ -331,7 +331,7 @@ type gfsDocId struct {
 func (gfs *GridFS) Remove(name string) (err error) {
 	iter := gfs.Files.Find(bson.M{"filename": name}).Select(bson.M{"_id": 1}).Iter()
 	var doc gfsDocId
-	for iter.Next(&doc) {
+	for iter.Next(&doc, nil) {
 		if e := gfs.RemoveId(doc.Id); e != nil {
 			err = e
 		}
@@ -734,7 +734,7 @@ func (file *GridFile) getChunk() (data []byte, err error) {
 	} else {
 		debugf("GridFile %p: Fetching chunk %d", file, file.chunk)
 		var doc gfsChunk
-		err = file.gfs.Chunks.Find(bson.D{{"files_id", file.doc.Id}, {"n", file.chunk}}).One(&doc)
+		err = file.gfs.Chunks.Find(bson.D{{"files_id", file.doc.Id}, {"n", file.chunk}}).One(&doc, nil)
 		data = doc.Data
 	}
 	file.chunk++
@@ -750,7 +750,7 @@ func (file *GridFile) getChunk() (data []byte, err error) {
 			defer session.Close()
 			chunks = chunks.With(session)
 			var doc gfsChunk
-			cache.err = chunks.Find(bson.D{{"files_id", id}, {"n", n}}).One(&doc)
+			cache.err = chunks.Find(bson.D{{"files_id", id}, {"n", n}}).One(&doc, nil)
 			cache.data = doc.Data
 			cache.wait.Unlock()
 		}(file.doc.Id, file.chunk)

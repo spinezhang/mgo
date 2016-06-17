@@ -29,10 +29,15 @@ package mgo
 type queue struct {
 	elems               []interface{}
 	nelems, popi, pushi int
+	datalen				int
 }
 
 func (q *queue) Len() int {
 	return q.nelems
+}
+
+func (q *queue) DataLen() int {
+	return q.datalen
 }
 
 func (q *queue) Push(elem interface{}) {
@@ -44,6 +49,7 @@ func (q *queue) Push(elem interface{}) {
 	q.elems[q.pushi] = elem
 	q.nelems++
 	q.pushi = (q.pushi + 1) % len(q.elems)
+	q.datalen += len(elem.([]byte))
 	//debugf(" Pushed(pushi=%d popi=%d cap=%d): %#v\n",
 	//       q.pushi, q.popi, len(q.elems), elem)
 }
@@ -58,6 +64,7 @@ func (q *queue) Pop() (elem interface{}) {
 	q.elems[q.popi] = nil // Help GC.
 	q.nelems--
 	q.popi = (q.popi + 1) % len(q.elems)
+	q.datalen -= len(elem.([]byte))
 	//debugf(" Popped(pushi=%d popi=%d cap=%d): %#v\n",
 	//       q.pushi, q.popi, len(q.elems), elem)
 	return elem
